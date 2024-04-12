@@ -1,4 +1,5 @@
 import { saveAs } from "file-saver";
+import "./FileList.css";
 
 const FileList = ({ filesList }) => {
   const handleViewFile = async (fileName) => {
@@ -39,14 +40,28 @@ const FileList = ({ filesList }) => {
 
   return (
     <>
-      <h3>My File List</h3>
-      {filesList.map((val, ind) => (
-        <div key={ind}>
-          <span>{`${ind + 1} ${val}`}</span>
-          <button onClick={() => handleViewFile(val)}>View</button>
-          <button onClick={() => handleDownloadFile(val)}>Download</button>
-        </div>
-      ))}
+      <h1 className="display-6">File List</h1>
+      <div className="files-list">
+        {filesList.map((val, ind) => (
+          <div key={ind} className="files">
+            <span>{`${ind + 1}. ${val}`}</span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => handleViewFile(val)}
+            >
+              View
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => handleDownloadFile(val)}
+            >
+              Download
+            </button>
+          </div>
+        ))}
+      </div>
     </>
   );
 };

@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-// Assume you have a function to call your API
-// import { uploadFileToServer } from '../api';
 
 const FileUpload = ({ refreshFilesList }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -35,9 +33,25 @@ const FileUpload = ({ refreshFilesList }) => {
 
   return (
     <>
-      <h3>Upload Files</h3>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload</button>
+      <h1 className="display-6">Upload Files</h1>
+      <div className="input-group">
+        <input
+          type="file"
+          className="form-control"
+          id="inputGroupFile04"
+          aria-describedby="inputGroupFileAddon04"
+          aria-label="Upload"
+          onChange={handleFileChange}
+        />
+        <button
+          className="btn btn btn-primary"
+          type="button"
+          id="inputGroupFileAddon04"
+          onClick={handleUpload}
+        >
+          Upload
+        </button>
+      </div>
     </>
   );
 };

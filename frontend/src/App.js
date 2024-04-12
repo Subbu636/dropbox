@@ -1,4 +1,5 @@
 import "./App.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect } from "react";
 import FileList from "./components/FileList.js";
 import FileUpload from "./components/FileUpload.js";
@@ -20,7 +21,7 @@ function App() {
   }, []);
   return (
     <div className="App">
-      <h2>Dropbox Clone App</h2>
+      <h1 className="display-4">Dropbox Clone App</h1>
       <FileList filesList={filesList} />
       <FileUpload refreshFilesList={refreshFilesList} filesList={filesList} />
     </div>
