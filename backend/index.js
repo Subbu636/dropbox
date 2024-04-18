@@ -4,23 +4,26 @@ const fs = require("fs").promises;
 const multer = require("multer");
 const path = require("path");
 const createUniqueFileName = require("./middleware/uniqueFileName");
+const getFolderStructure = require("./middleware/folderStructure");
 
 const app = express();
-const router = app.use(express.json());
 
 function unCaughtExceptionhandler(ex) {
-  console.error(ex.message, ex);
+  console.error(ex);
 }
 process.on("uncaughtException", unCaughtExceptionhandler);
 process.on("uhandledRejection", unCaughtExceptionhandler);
 
+const rootFolder = "data/";
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "data/");
+    const filePath = path.join(rootFolder, req.query.path);
+    cb(null, filePath);
   },
   filename: function (req, file, cb) {
     const uniqueFilename = createUniqueFileName(
-      path.join(__dirname, "data/"),
+      path.join(__dirname, rootFolder),
       file.originalname
     );
     cb(null, uniqueFilename);
@@ -28,37 +31,62 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-const directoryPath = "./data/";
-
-// cors middleware
 app.use(cors());
-
-// handling list of files request
-app.get("/files", async (_, res) => {
+app.use(express.json());
+app.use(async (req, res, next) => {
+  if (req.query.path === undefined)
+    return res.status(400).send("Path is required");
+  if (req.query.path.split(".").length > 2)
+    return res.status(400).send("Multiple dots in path are not accepted");
   try {
-    const entries = await fs.readdir(directoryPath);
-    res.send(entries);
-  } catch (ex) {
-    console.error(ex.message, ex);
-    res.status(500).send("Someting Failed");
+    await fs.stat(rootFolder + req.query.path);
+  } catch (err) {
+    return res.status(400).send("Invalid Path");
   }
+  next();
 });
 
-// handling specific file access request
-app.get("/files/:fileName", (req, res) => {
-  let filePath = path.resolve(directoryPath, req.params.fileName);
-  if (!filePath) res.status(400).send("No such file in directory");
-  res.sendFile(filePath);
+app.get("/folder", async (req, res) => {
+  const folderStructure = await getFolderStructure(
+    path.normalize(rootFolder + req.query.path)
+  );
+  res.send(folderStructure);
 });
 
-// handling upload request
-app.post("/upload", upload.single("file"), (req, res) => {
+app.get("/file", (req, res) => {
+  const filePath = path.resolve(path.join(rootFolder, req.query.path));
+  res.sendFile(path.normalize(filePath));
+});
+
+app.post("/addFile", upload.single("file"), (req, res) => {
   if (!req.file) {
-    return res.status(400).send("No file uploaded.");
+    return res.status(400).send("No file uploaded");
   }
   res.send("File uploaded successfully.");
 });
 
-// Listening at a port
+app.post("/addFolder", async (req, res) => {
+  if (!(req.query.name && req.query.name.trim()))
+    return res.status(400).send("Invalid folder name");
+  try {
+    const folderPath = path.resolve(
+      path.join(rootFolder, req.query.path, req.query.name)
+    );
+    await fs.mkdir(folderPath, { recursive: true });
+    res.send("Folder created successfully");
+  } catch (error) {
+    console.error("Error creating folder", error);
+    res.status(500).send("Error creating folder");
+  }
+});
+
+app.use((err, req, res, next) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).send("Something Failed");
+  }
+  next();
+});
+
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listning at port ${port}`));

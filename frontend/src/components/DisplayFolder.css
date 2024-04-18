@@ -1,0 +1,20 @@
+.folder {
+  cursor: pointer;
+  padding-left: 40px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  width: fit-content;
+}
+
+.file {
+  padding-left: 40px;
+}
+
+.file > * {
+  margin-right: 8px;
+}
+
+.intake > * {
+  padding-left: 20px;
+  margin: 4px;
+}

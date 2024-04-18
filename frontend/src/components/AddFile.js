@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 
-const FileUpload = ({ refreshFilesList }) => {
+const AddFile = ({ refresh, path }) => {
   const [selectedFile, setSelectedFile] = useState(null);
-
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
   const handleUpload = async () => {
     if (!selectedFile) return;
 
@@ -14,14 +9,17 @@ const FileUpload = ({ refreshFilesList }) => {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch("http://localhost:3001/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `http://localhost:3001/addFile?path=${path}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         alert("File uploaded successfully");
-        refreshFilesList();
+        refresh(path);
       } else {
         throw new Error("File upload failed");
       }
@@ -30,11 +28,12 @@ const FileUpload = ({ refreshFilesList }) => {
       alert("Error uploading file");
     }
   };
-
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
   return (
-    <>
-      <h1 className="display-6">Upload Files</h1>
-      <div className="input-group">
+    <div>
+      <div className="input-group input-group-sm">
         <input
           type="file"
           className="form-control"
@@ -52,8 +51,8 @@ const FileUpload = ({ refreshFilesList }) => {
           Upload
         </button>
       </div>
-    </>
+    </div>
   );
 };
 
-export default FileUpload;
+export default AddFile;
